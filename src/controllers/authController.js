@@ -9,7 +9,6 @@ const generateToken = (id) => {
   })
 }
 
-// Send token response with cookie
 const sendTokenResponse = (user, statusCode, res) => {
   const token = generateToken(user._id)
 
@@ -28,10 +27,12 @@ const sendTokenResponse = (user, statusCode, res) => {
       token,
       data: {
         user: {
-          id: user._id,
+          _id: user._id.toString(),
+          id: user._id.toString(),
           name: user.name,
           email: user.email,
           role: user.role,
+          status: user.status,
         },
       },
     })
@@ -86,6 +87,61 @@ export const login = async (req, res, next) => {
   }
 }
 
+// @desc    Register new user (client signup)
+// @route   POST /api/auth/register
+// @access  Public
+export const register = async (req, res, next) => {
+  try {
+    const { name, email, password, passwordConfirm } = req.body
+
+    // Validate all fields
+    if (!name || !email || !password || !passwordConfirm) {
+      return res.status(400).json({
+        success: false,
+        error: "Por favor proporcione nombre, email y contraseña",
+      })
+    }
+
+    // Check if passwords match
+    if (password !== passwordConfirm) {
+      return res.status(400).json({
+        success: false,
+        error: "Las contraseñas no coinciden",
+      })
+    }
+
+    // Check password length
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        error: "La contraseña debe tener al menos 6 caracteres",
+      })
+    }
+
+    // Check if user already exists
+    const userExists = await User.findOne({ email: email.toLowerCase() })
+    if (userExists) {
+      return res.status(400).json({
+        success: false,
+        error: "El email ya está registrado",
+      })
+    }
+
+    // Create user with default role: client
+    const user = await User.create({
+      name: name.trim(),
+      email: email.toLowerCase(),
+      password,
+      role: "client", // Default role for new registrations
+      status: "active",
+    })
+
+    sendTokenResponse(user, 201, res)
+  } catch (error) {
+    next(error)
+  }
+}
+
 // @desc    Get current logged in user
 // @route   GET /api/auth/me
 // @access  Private
@@ -95,7 +151,14 @@ export const getMe = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      data: user,
+      data: {
+        _id: user._id.toString(),
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        status: user.status,
+      },
     })
   } catch (error) {
     next(error)

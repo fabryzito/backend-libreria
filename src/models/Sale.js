@@ -21,12 +21,13 @@ const saleProductSchema = new mongoose.Schema({
 
 const saleSchema = new mongoose.Schema(
   {
-    client: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Client",
-      required: [true, "El cliente es obligatorio"],
+      ref: "User",
+      required: [true, "El usuario es obligatorio"],
     },
-    clientName: String,
+    userName: String,
+    userEmail: String,
     products: [saleProductSchema],
     total: {
       type: Number,
@@ -43,9 +44,27 @@ const saleSchema = new mongoose.Schema(
       enum: ["pending", "completed", "cancelled"],
       default: "completed",
     },
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+    deliveryMethod: {
+      type: String,
+      enum: ["home_delivery", "local_pickup"],
+      required: [true, "Método de entrega es obligatorio"],
+    },
+    deliveryAddress: {
+      street: String,
+      city: String,
+      postalCode: String,
+      country: String,
+      notes: String,
+    },
+    orderStatus: {
+      type: String,
+      enum: ["En preparación", "En envío", "Preparado", "Entregado", "Completado"],
+      default: "En preparación",
+    },
+    shippingCost: {
+      type: Number,
+      default: 0,
+      min: 0,
     },
   },
   {
@@ -54,8 +73,10 @@ const saleSchema = new mongoose.Schema(
 )
 
 // Index for queries
-saleSchema.index({ client: 1 })
+saleSchema.index({ user: 1 })
 saleSchema.index({ createdAt: -1 })
 saleSchema.index({ status: 1 })
+saleSchema.index({ orderStatus: 1 })
+saleSchema.index({ deliveryMethod: 1 })
 
 export default mongoose.model("Sale", saleSchema)

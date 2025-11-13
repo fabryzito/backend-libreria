@@ -90,7 +90,7 @@ export const createUser = async (req, res, next) => {
 // @access  Private (Admin only)
 export const updateUser = async (req, res, next) => {
   try {
-    let user = await User.findById(req.params.id)
+    const user = await User.findById(req.params.id)
 
     if (!user) {
       return res.status(404).json({
@@ -99,11 +99,18 @@ export const updateUser = async (req, res, next) => {
       })
     }
 
-    // If password is being updated, it will be hashed by the pre-save hook
-    user = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    })
+    user.name = req.body.name || user.name
+    user.email = req.body.email || user.email
+    user.role = req.body.role || user.role
+    user.status = req.body.status || user.status
+
+    // Only update password if provided and not empty
+    if (req.body.password && req.body.password.trim()) {
+      user.password = req.body.password
+    }
+
+    // Save will trigger the pre-save hook which will hash the password if modified
+    await user.save()
 
     res.status(200).json({
       success: true,

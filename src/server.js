@@ -9,7 +9,6 @@ import productRoutes from "./routes/productRoutes.js"
 import categoryRoutes from "./routes/categoryRoutes.js"
 import providerRoutes from "./routes/providerRoutes.js"
 import userRoutes from "./routes/userRoutes.js"
-import clientRoutes from "./routes/clientRoutes.js"
 import saleRoutes from "./routes/saleRoutes.js"
 
 // Load environment variables
@@ -35,7 +34,6 @@ app.use("/api/products", productRoutes)
 app.use("/api/categories", categoryRoutes)
 app.use("/api/providers", providerRoutes)
 app.use("/api/users", userRoutes)
-app.use("/api/clients", clientRoutes)
 app.use("/api/sales", saleRoutes)
 
 // Health check
@@ -53,7 +51,7 @@ mongoose
     console.log("✅ Connected to MongoDB")
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`)
-    })
+    }) 
   })
   .catch((error) => {
     console.error("❌ MongoDB connection error:", error)
@@ -62,7 +60,7 @@ mongoose
 
 // Handle unhandled promise rejections
 process.on("unhandledRejection", (err) => {
-  console.error("UNHANDLED REJECTION! 💥 Shutting down...")
+  console.error("UNHANDLED REJECTION! 💥 Shutting down...") 
   console.error(err.name, err.message)
   process.exit(1)
 })
